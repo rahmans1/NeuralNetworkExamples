@@ -95,3 +95,34 @@ class io:
         output = self.input[(m-1)*self.tau+1+k:]
 
         return output, input
+
+""" Class for echo state network """
+class esn:
+    def __init__(self, n_i, n_r, theta_ls, theta_sr, theta_rc):      
+      """
+      Inputs:
+          theta_ls = input weights
+          theta_sr = spectral radius of recurrent layer weight matrix
+          theta_rc = sparsity of recurrent layer weight matrix
+      """
+      
+      """ Initialize the recurrent layer weights """
+      rng_r = np.random.default_rng(1234)
+      uniform_r=stats.uniform(loc=-1, scale=2)
+      uniform_r.random_state = np.random.RandomState(seed=5623)
+      self.w_r= sparse.random(n_r, n_r, density=theta_rc, random_state=rng_r, data_rvs=uniform_r.rvs).todense()
+
+      e, v = np.linalg.eig(self.w_r)
+      max_e= np.max(np.abs(e))
+      self.w_r*=  theta_sr/max_e
+
+      """ Initialize the input weights  """
+      rng_i = np.random.default_rng(2621)
+      uniform_r=stats.uniform(loc=-1, scale=2)
+      uniform_r.random_state = np.random.RandomState(seed=4322)
+      self.w_i= sparse.random(n_r, n_i, density=1.0, random_state=rng_i, data_rvs=uniform_r.rvs).todense()
+      self.w_i*= theta_ls
+      self.w_o = None
+
+      return
+
