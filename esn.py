@@ -175,3 +175,64 @@ def calculate_embedding(data):
     io_data.compute_m(r=4)           
     # The heuristic is chosen arbitrarily. The embedding dimension is chosen to be the point where the FNN graph starts to plateau
     return io_data
+
+    
+def run_experiment(io_data, m, k, batch_size):
+    output, input = io_data.create_input_output_pairs(m=m, k=k)  
+
+    num_epochs=30                 
+    end_batch= np.arange(0, input.shape[0], batch_size)
+    end_batch= np.append(end_batch,input.shape[0])
+    
+    esn_model=esn(input.shape[1],200,0.3,0.9,0.4)
+    train_input= None
+    train_output= None
+
+    
+    for epoch in range(num_epochs):
+      for i in range(1, end_batch.size-1):
+          train_input = input[end_batch[0]:end_batch[i]]
+          train_output = output[end_batch[0]:end_batch[i]]
+          val_input  = input[end_batch[i]:end_batch[i+1]]
+          val_output = output[end_batch[i]:end_batch[i+1]]
+          esn_model.train(train_input,train_output)
+          train_y=esn_model.predict(train_input)
+          val_y= esn_model.predict(val_input)
+          print("Epoch:"+str(epoch)+", Batch:"+str(i)+" Training RMSE:"+str(np.sqrt((np.square(train_y - train_output)).mean())))
+          print("Epoch:"+str(epoch)+", Batch:"+str(i)+" Test RMSE:"+str(np.sqrt((np.square(val_y - val_output)).mean())))
+    
+    """
+    plt.plot(train_output[0:200])
+    plt.plot(train_y[0:200])
+    plt.show()
+    plt.plot(val_output[0:200])
+    plt.plot(val_y[0:200])
+    plt.show()
+    """
+
+    figure= plt.figure(figsize=(6000,75))
+    ax = plt.subplots()
+    ax[1].plot(train_output)
+    ax[1].plot(train_y)
+    ax[1].plot(np.arange(train_output.size,train_output.size+val_output.size), val_output)
+    ax[1].plot(np.arange(train_output.size,train_output.size+val_output.size), val_y)
+    plt.show()
+
+    return
+    
+def main():
+    #sin_data = calculate_embedding("/content/drive/MyDrive/AML_project_description/2sin.txt")
+    #run_experiment(sin_data, m=4, k=10, batch_size=500)
+
+    lorentz_data = calculate_embedding("/content/drive/MyDrive/AML_project_description/lorentz.txt")
+    run_experiment(lorentz_data, m=4, k=10, batch_size=2400)
+
+
+
+
+   # lorentz_data= calculate_embedding("/content/drive/MyDrive/AML_project_description/lorentz.txt")
+    
+
+if __name__ == "__main__":
+    main()
+
