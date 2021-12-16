@@ -82,3 +82,16 @@ class io:
         plt.show()
         return
 
+    """Create input and output pairs from the whole data."""
+    def create_input_output_pairs(self, m, k):
+
+        input_array=[]
+        input_array.append(self.input)
+        for i in range(m-1, 0,-1):
+            input_array.append(np.roll(self.input, (m-i)*self.tau))
+        input_array=np.transpose(input_array)
+
+        input  = input_array[(m-1)*self.tau+1:-k]
+        output = self.input[(m-1)*self.tau+1+k:]
+
+        return output, input
