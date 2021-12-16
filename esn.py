@@ -126,3 +126,38 @@ class esn:
 
       return
 
+
+    def train(self,input,output):
+
+      n_r = self.w_r.shape[0]
+      X=[];
+      X.append(np.asmatrix(np.zeros(n_r)));
+
+
+      for i in range(1, input.shape[0]):
+        A=X[i-1]@self.w_r.T
+        B=input[i]@self.w_i.T
+        X.append(np.tanh(A+B))
+
+      X=np.array(X)[:,0,:]
+      LHS=X.T@X+0.1*np.identity(n_r)
+      RHS=X.T@output
+      self.w_o = np.asmatrix(solve(LHS, RHS))
+
+      return
+
+    def predict(self,input):
+      X=[];
+      y=[]
+
+      B=input[0]@self.w_i.T
+      X.append(np.tanh(B))
+      y.append(X[0]@self.w_o.T)
+      for i in range(1, input.shape[0]):
+        A=X[i-1]@self.w_r.T
+        B=input[i]@self.w_i.T
+        X.append(np.tanh(A+B))
+        y.append(X[i]@self.w_o.T)
+
+      return np.array(y).flatten()
+
