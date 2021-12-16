@@ -161,3 +161,17 @@ class esn:
 
       return np.array(y).flatten()
 
+def calculate_embedding(data):
+    label= Path(data).stem
+    print("Time series analysis for "+label+" data starts here")
+    io_data = io(data)   # Load data
+    plt.plot(io_data.acf, 'bo')    # Display the autocorrelation
+    plt.xlim(0, 200)
+    plt.title("Autocorrelation")
+    plt.show()
+    plt.plot(io_data.amf, 'bo')    # Display the auto mutual information
+    plt.title("Auto Mutual Information")
+    plt.show()
+    io_data.compute_m(r=4)           
+    # The heuristic is chosen arbitrarily. The embedding dimension is chosen to be the point where the FNN graph starts to plateau
+    return io_data
